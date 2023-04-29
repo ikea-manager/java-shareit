@@ -13,7 +13,7 @@ public interface ItemService {
    * @param itemCreateDto Item transfer object, which we need to save. This one will be converted
    *                      into Item object, passed some checks and will be saved on DB.
    * @param sharerId      Id of user, which creates item.
-   * @return ItemDto ResponseEntity with HTTP code and created item.
+   * @return ResponseEntity<Long> ResponseEntity with HTTP code and id of created item.
    */
   ItemDto createItem(ItemCreateDto itemCreateDto, Long sharerId);
 
@@ -31,10 +31,9 @@ public interface ItemService {
    * findItemById. Finds item by id.
    *
    * @param itemId Id of item we need to find.
-   * @param userId Id of current user.
    * @return ResponseEntity<ItemDto> ResponseEntity with HTTP code and found item entity.
    */
-  ItemDto findItemById(Long itemId, Long userId);
+  ItemDto findItemById(Long itemId);
 
   /**
    * findAllItemsByUserId. Finds all items by owner's id.

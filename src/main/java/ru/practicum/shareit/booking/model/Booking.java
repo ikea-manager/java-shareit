@@ -13,17 +13,21 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utils.enums.Status;
 import ru.practicum.shareit.utils.literal.JpaMappingDetails;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = JpaMappingDetails.BOOKING_TABLE)
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 
   @Id
@@ -31,17 +35,17 @@ public class Booking {
   @Column(name = JpaMappingDetails.ID, nullable = false)
   private Long id;
 
-  @Column(name = JpaMappingDetails.START_DATE)
+  @Column(name = JpaMappingDetails.START)
   private LocalDateTime startDate;
 
-  @Column(name = JpaMappingDetails.END_DATE)
+  @Column(name = JpaMappingDetails.END)
   private LocalDateTime endDate;
 
-  @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
   @JoinColumn(name = JpaMappingDetails.ITEM_ID)
   private Item item;
 
-  @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
   @JoinColumn(name = JpaMappingDetails.BOOKER_ID)
   private User booker;
 
