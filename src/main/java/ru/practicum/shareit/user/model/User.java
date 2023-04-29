@@ -1,5 +1,6 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.user.model;
 
+import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,8 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,17 +16,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utils.literal.JpaMappingDetails;
 
 @Entity
 @Getter
 @Setter
-@Table(name = JpaMappingDetails.ITEMS_TABLE)
+@Table(name = JpaMappingDetails.USERS_TABLE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
+public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,20 +36,22 @@ public class Item {
   @Column(name = JpaMappingDetails.NAME)
   private String name;
 
-  @Column(name = JpaMappingDetails.DESCRIPTION)
-  private String description;
+  @Column(name = JpaMappingDetails.EMAIL)
+  private String email;
 
-  @Column(name = JpaMappingDetails.AVAILABLE)
-  private Boolean available;
+  @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = JpaMappingDetails.OWNER)
+  private List<Item> items;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-  @JoinColumn(name = JpaMappingDetails.OWNER_ID)
-  private User owner;
-
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-  @JoinColumn(name = JpaMappingDetails.REQUEST_ID)
-  private ItemRequest request;
-
-  @OneToOne(mappedBy = JpaMappingDetails.ITEM)
+  @OneToOne(mappedBy = JpaMappingDetails.BOOKER)
   private Booking booking;
+
+  @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = JpaMappingDetails.REQUESTOR)
+  private List<ItemRequest> requests;
+
+  public User(Long userId, String name, String email) {
+    User user = new User();
+    user.setId(userId);
+    user.setName(name);
+    user.setEmail(email);
+  }
 }
