@@ -9,10 +9,7 @@ import ru.practicum.shareit.item.utils.literal.ItemDtoJsonProperty;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDto {
-
-  @JsonProperty(ItemDtoJsonProperty.ID)
-  private Long id;
+public class ItemUpdateDto {
 
   @JsonProperty(ItemDtoJsonProperty.NAME)
   private String name;
