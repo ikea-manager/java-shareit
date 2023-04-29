@@ -18,13 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utils.HeaderUtils;
 import ru.practicum.shareit.utils.JsonEntitySerializer;
-import ru.practicum.shareit.utils.literal.ExceptionMessage;
-import ru.practicum.shareit.utils.literal.HttpLiterals;
 import ru.practicum.shareit.utils.literal.LogMessage;
 
 @RestController
@@ -34,8 +36,8 @@ import ru.practicum.shareit.utils.literal.LogMessage;
 public class ItemController {
 
   private final JsonEntitySerializer jsonEntitySerializer;
-
   private final ItemService itemService;
+  private final CommentService commentService;
 
   @Transactional
   @PostMapping
@@ -50,9 +52,9 @@ public class ItemController {
       log.debug(String.format(LogMessage.DEBUG_REQUEST_BODY_LOG,
           jsonEntitySerializer.serializeObjectToJson(itemCreateDto)));
     }
-    String sharerId = obtainAndCheckSharerIdParam(request);
+    Long sharerId = HeaderUtils.obtainAndCheckSharerIdParam(request);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(itemService.createItem(itemCreateDto, Long.valueOf(sharerId)));
+        .body(itemService.createItem(itemCreateDto, sharerId));
   }
 
   @Transactional
@@ -72,9 +74,9 @@ public class ItemController {
       log.debug(String.format(LogMessage.DEBUG_REQUEST_BODY_LOG,
           jsonEntitySerializer.serializeObjectToJson(itemUpdateDto)));
     }
-    String sharerId = obtainAndCheckSharerIdParam(request);
+    Long sharerId = HeaderUtils.obtainAndCheckSharerIdParam(request);
     return ResponseEntity.status(HttpStatus.OK)
-        .body(itemService.updateItem(itemUpdateDto, itemId, Long.valueOf(sharerId)));
+        .body(itemService.updateItem(itemUpdateDto, itemId, sharerId));
   }
 
   @ResponseStatus(value = HttpStatus.OK)
@@ -82,15 +84,17 @@ public class ItemController {
   public ResponseEntity<ItemDto> getItemById(
       @PathVariable("id")
       @NotNull
-      Long itemId) {
-    return ResponseEntity.status(HttpStatus.OK).body(itemService.findItemById(itemId));
+      Long itemId,
+      HttpServletRequest request) {
+    Long userId = HeaderUtils.obtainAndCheckSharerIdParam(request);
+    return ResponseEntity.status(HttpStatus.OK).body(itemService.findItemById(itemId, userId));
   }
 
   @GetMapping
   @ResponseStatus(value = HttpStatus.OK)
   public ResponseEntity<List<ItemDto>> getAllItemsOfUser(HttpServletRequest request) {
-    String sharerId = obtainAndCheckSharerIdParam(request);
-    return ResponseEntity.ok(itemService.findAllItemsByOwnerId(Long.valueOf(sharerId)));
+    Long sharerId = HeaderUtils.obtainAndCheckSharerIdParam(request);
+    return ResponseEntity.ok(itemService.findAllItemsByOwnerId(sharerId));
   }
 
   @GetMapping("/search")
@@ -101,13 +105,23 @@ public class ItemController {
     return ResponseEntity.ok(itemService.findAllItemsByTextInNameOrDescription(text));
   }
 
-  private String obtainAndCheckSharerIdParam(HttpServletRequest request) {
-    String sharerId = request.getHeader(HttpLiterals.SHARER_USER_ID_HEADER_PARAM);
-
-    if (sharerId == null || sharerId.isEmpty()) {
-      throw new IllegalArgumentException(ExceptionMessage.SHARER_ID_NOT_FOUND);
+  @PostMapping("/{itemId}/comment")
+  @ResponseStatus(value = HttpStatus.OK)
+  public ResponseEntity<CommentDto> createCommentForItem(
+      @PathVariable("itemId")
+      @NotNull
+      Long itemId,
+      @RequestBody
+      @Valid
+      @NotNull
+      CommentCreateDto commentCreateDto,
+      HttpServletRequest request) {
+    Long sharerId = HeaderUtils.obtainAndCheckSharerIdParam(request);
+    if (log.isDebugEnabled()) {
+      log.debug(String.format(LogMessage.DEBUG_REQUEST_BODY_LOG,
+          jsonEntitySerializer.serializeObjectToJson(commentCreateDto)));
     }
-
-    return sharerId;
+    return ResponseEntity.ok(
+        commentService.createCommentForItem(itemId, sharerId, commentCreateDto));
   }
 }

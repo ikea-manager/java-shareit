@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.item.utils.literal.ItemDtoJsonProperty;
 import ru.practicum.shareit.utils.literal.ValidationExceptionMessage;
 
 @Data
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ItemCreateDto {
 
   @NotBlank(message = ValidationExceptionMessage.NAME_IS_EMPTY)
